@@ -56,6 +56,12 @@ func main() {
 			line := scanner.Text()
 			if todoRegex.MatchString(line) {
 				date := blameDate(pathName, lineNum)
+				cutoff := time.Now().AddDate(0, 0, -*sinceDays)
+				if *sinceDays > 0 && date.Before(cutoff) {
+					// skip TODOs newer than the cutoff
+					lineNum++
+					continue
+				}
 				todos = append(todos, Todo{
 					FilePath: pathName,
 					LineNum:  lineNum,
