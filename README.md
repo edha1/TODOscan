@@ -35,4 +35,4 @@ TODOscan is a CLI tool built with **Go** that scans code and finds **TODO** comm
 Run the tool from your command prompt (inside your git repo):
 
 ```bash
-TODOscan.exe -path . -ext .java -olderthan 7 -oldestFirst true
+./TODOscan.exe -path . -ext .java -olderthan 7 -oldestFirst true
