@@ -3,14 +3,15 @@
 TODOscan is a CLI tool built with **Go** that scans code and finds **TODO** comments. It also integrates with **git blame** and sorts based on the date that the comment was made, to prioritise older TODOS. 
 
 ## ⚠️ This Project is a Work in Progress.
-> This project is a **work in progress**, I'm working on making the **fixing any bugs, adding features,** and allowing for the search of other comment types (like FIXME). I have made this project to practise **Go** programming and increase development efficiency. 
+> This project is a **work in progress**, I'm working on **fixing any bugs, adding features, creating it into a VS Code extension**. I have made this project to practise **Go** programming and increase development efficiency. 
 ---
 
 ## ✨ Features
 
-- Recursively scans files in a given path for `TODO` comments (file must be in a initialised git repo). 
-- Uses `git blame` to fetch the **commit date** of each TODO.  
-- Returns all the **TODO** comments in the codebase. 
+- Recursively scans files in a given path for `TODO` and `FIXME` comments (file must be in a initialised git repo). 
+- Uses `git blame` to fetch the **commit date** of each comment.  
+- Returns all the **TODO and FIXME** comments in the codebase in date order. 
+- This allows developers to **quickly identify and prioritise older or critical tasks**, track outstanding issues in the code, and **maintain better code quality** by addressing lingering comments efficiently.
 
 ---
 
@@ -28,3 +29,10 @@ TODOscan is a CLI tool built with **Go** that scans code and finds **TODO** comm
 | `-olderthan`   | Only show TODOs older than N days                                           | `0`           |
 | `-oldestFirst` | Show results in order of oldest first (true/false)                          | `true`        |
  
+
+### ✅ Example Usage
+
+Run the tool from your command prompt (inside your git repo):
+
+```bash
+TODOscan.exe -path . -ext .java -olderthan 7 -oldestFirst true

@@ -28,8 +28,8 @@ var fixmeRegex = regexp.MustCompile(`(?i)fixme`)
 func main() {
 
 	// CLI flags
-	path := flag.String("path", ".", "Path to scan for TODOs")                         // the default is current directory
-	ext := flag.String("ext", ".java", "File extension to include (e.g., .java, .go)") // the default is java
+	path := flag.String("path", ".", "Path to scan for TODOs")
+	ext := flag.String("ext", ".java", "File extension to include (e.g., .java, .go)")
 	olderThan := flag.Int("olderthan", 0, "Only show TODOs older than N days")
 	oldestFirst := flag.Bool("oldestFirst", true, "Show in order of oldest first")
 
@@ -84,9 +84,9 @@ func main() {
 
 		// sort in order required
 		if *oldestFirst {
-			return todos[i].Date.Before(todos[j].Date) // oldest first
+			return todos[i].Date.Before(todos[j].Date)
 		} else {
-			return todos[i].Date.After(todos[j].Date) // newest first
+			return todos[i].Date.After(todos[j].Date)
 		}
 	})
 
