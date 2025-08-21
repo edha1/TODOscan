@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -22,42 +23,47 @@ type Todo struct {
 }
 
 var todoRegex = regexp.MustCompile(`(?i)todo`)
+var fixmeRegex = regexp.MustCompile(`(?i)fixme`)
 
 func main() {
 
 	// CLI flags
-	path := flag.String("path", ".", "Path to scan for TODOs")
-	ext := flag.String("ext", ".go", "File extension to include")
-	sinceDays := flag.Int("since", 0, "Only show TODOs older than N days")
+	path := flag.String("path", ".", "Path to scan for TODOs")                         // the default is current directory
+	ext := flag.String("ext", ".java", "File extension to include (e.g., .java, .go)") // the default is java
+	olderThan := flag.Int("olderthan", 0, "Only show TODOs older than N days")
+	oldestFirst := flag.Bool("oldestFirst", true, "Show in order of oldest first")
 
 	flag.Parse()
+
+	normalizedExt := strings.TrimSpace(*ext)
+	if !strings.HasPrefix(normalizedExt, ".") {
+		normalizedExt = "." + normalizedExt
+	}
 
 	var todos []Todo
 
 	// WalkDir takes the string search path and a callback function
 	filepath.WalkDir(*path, func(pathName string, d os.DirEntry, err error) error {
 
-		// base cases, ignore errors, directories and files not of the required type (.go/.java)
-		if err != nil || d.IsDir() || !strings.HasSuffix(pathName, *ext) {
+		if err != nil || d.IsDir() || (*ext != "" && !strings.HasSuffix(pathName, strings.ToLower(*ext))) {
 			return nil
 		}
 
-		file, err := os.Open(pathName) // open file
+		file, err := os.Open(pathName)
 
-		// return if error opening file
 		if err != nil {
 			return nil
 		}
-		defer file.Close() // close the file when the surrounding block has been run
+		defer file.Close()
 
-		scanner := bufio.NewScanner(file) // open a scanner
+		scanner := bufio.NewScanner(file)
 		lineNum := 1
 		for scanner.Scan() {
 			line := scanner.Text()
-			if todoRegex.MatchString(line) {
+			if todoRegex.MatchString(line) || fixmeRegex.MatchString(line) {
 				date := blameDate(pathName, lineNum)
-				cutoff := time.Now().AddDate(0, 0, -*sinceDays)
-				if *sinceDays > 0 && date.Before(cutoff) {
+				cutoff := time.Now().AddDate(0, 0, -*olderThan)
+				if *olderThan > 0 && date.Before(cutoff) {
 					// skip TODOs newer than the cutoff
 					lineNum++
 					continue
@@ -75,7 +81,13 @@ func main() {
 	})
 
 	sort.Slice(todos, func(i, j int) bool {
-		return todos[i].Date.Before(todos[j].Date)
+
+		// sort in order required
+		if *oldestFirst {
+			return todos[i].Date.Before(todos[j].Date) // oldest first
+		} else {
+			return todos[i].Date.After(todos[j].Date) // newest first
+		}
 	})
 
 	for _, t := range todos {
@@ -83,22 +95,23 @@ func main() {
 	}
 }
 
-// Function to get the date of a comment using 'git blame'
 func blameDate(path string, line int) time.Time {
-	cmd := exec.Command("git", "blame", "--line-porcelain", fmt.Sprintf("+%d,%d", line, line), path) // line porcelain gives key value pairs
-	output, err := cmd.Output()                                                                      // get output
+	cmd := exec.Command("git", "blame", "--porcelain", "-L", fmt.Sprintf("%d,%d", line, line), path)
+	output, err := cmd.Output()
 	if err != nil {
-		return time.Time{} // return zero value
+		fmt.Println("git blame error:", err)
+		return time.Time{}
 	}
-	scanner := bufio.NewScanner(bytes.NewReader(output))
-	for scanner.Scan() { // while there is input lines to read
-		line := scanner.Text()
 
-		// see time and convert as required
-		if strings.HasPrefix(line, "author-time ") {
-			ts := strings.TrimPrefix(line, "author-time ")
-			sec, _ := time.ParseDuration(ts + "s")
-			return time.Unix(int64(sec.Seconds()), 0)
+	lines := bytes.Split(output, []byte("\n"))
+	for _, line := range lines {
+		if bytes.HasPrefix(line, []byte("author-time ")) {
+			tsStr := string(bytes.TrimPrefix(line, []byte("author-time ")))
+			ts, err := strconv.ParseInt(tsStr, 10, 64)
+			if err != nil {
+				return time.Time{}
+			}
+			return time.Unix(ts, 0)
 		}
 	}
 	return time.Time{}

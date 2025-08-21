@@ -3,7 +3,7 @@
 TODOscan is a CLI tool built with **Go** that scans code and finds **TODO** comments. It also integrates with **git blame** and sorts based on the date that the comment was made, to prioritise older TODOS. 
 
 ## ⚠️ This Project is a Work in Progress.
-> This project is a **work in progress**, I'm working on making the **output in date order as required, fixing any bugs**, adding features, and allowing for the search of other comment types (like FIXME). I have made this project to practise **Go** programming and increase development efficiency. 
+> This project is a **work in progress**, I'm working on making the **fixing any bugs, adding features,** and allowing for the search of other comment types (like FIXME). I have made this project to practise **Go** programming and increase development efficiency. 
 ---
 
 ## ✨ Features
@@ -16,15 +16,15 @@ TODOscan is a CLI tool built with **Go** that scans code and finds **TODO** comm
 
 ## 🚀 How to use: 
 
-1. Clone the repo
-2. Build the executable: 
+1. Put the .exe in your git repo that you want to find the TODO/FIXME comments in. 
+2. Run the command: ./TODOscan [flags] *see below* 
 
-```
-go build -o todo.exe main.go // on windows 
-GOOS=windows GOARCH=amd64 go build -o todo.exe main.go // on Linux/Mac 
+### 🚩 Available Flags
 
-```
-3. Use the command: .\todo.exe --path <directory> --ext <file-extension> --since <days> to get all TODO comments in line order 
-
-*NOTE:* 
-If no paths is given, the default is **.**, which scans all files in the current directory. Default for ext is **.go** files. Default for since is **0 days**.  
+| Flag           | Description                                                                 | Default        |
+|----------------|-----------------------------------------------------------------------------|----------------|
+| `-path`        | Path to scan for TODOs                                                      | `.` (current directory) |
+| `-ext`         | File extension to include (e.g., `.java`, `.go`)                            | `.java`       |
+| `-olderthan`   | Only show TODOs older than N days                                           | `0`           |
+| `-oldestFirst` | Show results in order of oldest first (true/false)                          | `true`        |
+ 
